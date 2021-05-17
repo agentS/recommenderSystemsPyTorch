@@ -19,7 +19,7 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     Read raw data.
     Biniarize ratings into implicit feedbacks.
     Assing old user/item id into new consecutive ids.
-    
+
     """
     print('Preprocess starts.')
     print("Loading the dataset from \"%s\"" % data_path)
@@ -33,17 +33,17 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     num_items = len(pd.unique(data.item))
 
     print('initial user, item:', num_users, num_items)
-    
+
     if binarize_threshold > 0.0:
         print("Binarize ratings greater than or equal to %.f" % binarize_threshold)
         data = data[data['ratings'] >= binarize_threshold]
-    
+
     # convert ratings into implicit feedback
     data['ratings'] = 1.0
 
     num_items_by_user = data.groupby('user', as_index=False).size()
     num_items_by_user = num_items_by_user.set_index('user')
-    
+
     num_users_by_item = data.groupby('item', as_index=False).size()
     num_users_by_item = num_users_by_item.set_index('item')
 
@@ -51,7 +51,7 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     print('Assign new user id...')
     user_frame = num_items_by_user
     user_frame.columns = ['item_cnt']
-    if order_by_popularity: 
+    if order_by_popularity:
         user_frame = user_frame.sort_values(by='item_cnt', ascending=False)
     user_frame['new_id'] = list(range(num_users))
 
@@ -61,12 +61,12 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     user_to_num_items = user_frame.to_dict()['item_cnt']
 
     data.user = [user_id_dict[x] for x in  data.user.tolist()]
-    
+
     # assign new item id
     print('Assign new item id...')
     item_frame = num_users_by_item
     item_frame.columns = ['user_cnt']
-    if order_by_popularity: 
+    if order_by_popularity:
         item_frame = item_frame.sort_values(by='user_cnt', ascending=False)
     item_frame['new_id'] = range(num_items)
 
@@ -76,13 +76,13 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     item_to_num_users = item_frame.to_dict()['user_cnt']
 
     data.item = [item_id_dict[x] for x in  data.item.tolist()]
-    
+
     # # assign new user id
     # print('Assign new user id...')
     # user_frame = num_items_by_user.to_frame()
     # user_frame.columns = ['item_cnt']
-    
-    # if order_by_popularity: 
+
+    # if order_by_popularity:
     #     user_frame = user_frame.sort_values(by='item_cnt', ascending=False)
     # user_frame['new_id'] = list(range(num_users))
 
@@ -92,12 +92,12 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     # user_to_num_items = user_frame.to_dict()['item_cnt']
 
     # data.user = [user_id_dict[x] for x in  data.user.tolist()]
-    
+
     # # assign new item id
     # print('Assign new item id...')
     # item_frame = num_users_by_item.to_frame()
     # item_frame.columns = ['user_cnt']
-    # if order_by_popularity: 
+    # if order_by_popularity:
     #     item_frame = item_frame.sort_values(by='user_cnt', ascending=False)
     # item_frame['new_id'] = range(num_items)
 
@@ -115,7 +115,7 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
     Proprocess UIRT raw data into trainable form.
     Holdout feedbacks for test per user.
     Save preprocessed data.
-    
+
     """
     # Split data into train/test
     print('Split data into train/test.')
@@ -130,12 +130,12 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
         num_test = num_items_user - num_train
 
         group = group.sort_values(by='timestamps')
-        
+
         idx = np.ones(num_items_user, dtype='bool')
 
         test_idx = np.random.choice(num_items_user, num_test, replace=False)
         idx[test_idx] = False
-        
+
         if len(group[idx]) == 0:
             num_zero_train += 1
         else:
@@ -145,9 +145,11 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
             num_zero_test += 1
         else:
             test_list.append(group[np.logical_not(idx)])
-    
+
     train_df = pd.concat(train_list)
+    train_df.to_csv(f'{save_path}/training.csv')
     test_df = pd.concat(test_list)
+    test_df.to_csv(f'{save_path}/testing.csv')
     print('# zero train, test: %d, %d' % (num_zero_train, num_zero_test))
 
     train_sparse = df_to_sparse(train_df, shape=(num_users, num_items))
