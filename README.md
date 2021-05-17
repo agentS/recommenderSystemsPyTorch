@@ -1,6 +1,7 @@
 # Recommender System in PyTorch
 
 Implementations of various top-N recommender systems in [PyTorch](pytorch.org) for practice.
+This repository [is a fork of an already existing repository](https://github.com/yoongi0428/RecSys_PyTorch/)
  
 [Movielens](https://grouplens.org/datasets/movielens/) 100k & 1M are used as datasets.
  
