@@ -13,7 +13,7 @@ def load_data(data_path):
 
     return train_matrix, test_matrix, user_id_map, user_popularity, item_id_map, item_popularity, num_uesrs, num_items
 
-def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_threshold=0.0, order_by_popularity=True):
+def preprocess(data_path, save_path, stat_path, sep, data_dir, train_ratio=0.8, binarize_threshold=0.0, order_by_popularity=True):
     """
     [1]
     Read raw data.
@@ -147,9 +147,9 @@ def preprocess(data_path, save_path, stat_path, sep, train_ratio=0.8, binarize_t
             test_list.append(group[np.logical_not(idx)])
 
     train_df = pd.concat(train_list)
-    train_df.to_csv(f'{save_path}/training.csv')
+    train_df.to_csv(f'{data_dir}/training.csv')
     test_df = pd.concat(test_list)
-    test_df.to_csv(f'{save_path}/testing.csv')
+    test_df.to_csv(f'{data_dir}/testing.csv')
     print('# zero train, test: %d, %d' % (num_zero_train, num_zero_test))
 
     train_sparse = df_to_sparse(train_df, shape=(num_users, num_items))

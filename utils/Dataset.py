@@ -27,7 +27,7 @@ class Dataset:
         if os.path.exists(data_path) and os.path.exists(data_path):
             print('Already preprocessed. Load from file.')
         else:
-            preprocess(os.path.join(data_dir, data_name, filename), data_path, stat_path, sep)
+            preprocess(os.path.join(data_dir, data_name, filename), data_path, stat_path, sep, data_dir)
 
         print('Read movielens data from %s' % data_path)
         self.train_matrix, self.test_matrix, self.user_id_map, self.user_popularity, self.item_id_map, self.item_popularity, self.num_uesrs, self.num_items = load_data(data_path)
@@ -45,7 +45,7 @@ class Dataset:
 
     def generate_pairwise_data_from_matrix(self, rating_matrix, num_negatives=1, p=None):
         num_users, num_items = rating_matrix.shape
-        
+
         users = []
         positives = []
         negatives = []
